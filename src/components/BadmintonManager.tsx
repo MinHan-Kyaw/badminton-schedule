@@ -39,30 +39,13 @@ const BadmintonManager: React.FC = () => {
   const [playerToRemove, setPlayerToRemove] = useState<string | null>(null);
   const [showFinishMatchDialog, setShowFinishMatchDialog] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [pendingMaxValues, setPendingMaxValues] = useState({
-    maxPlayers: 18,
-    maxStandbyPlayers: 4
-  });
 
-  // Helper function to get current max values (considers pending changes)
+  // Helper function to get current max values from database
   const getCurrentMaxValues = () => {
-    console.log('=== getCurrentMaxValues Debug ===');
-    console.log('isAdmin:', isAdmin);
-    console.log('hasUnsavedChanges:', hasUnsavedChanges);
-    console.log('gameSession:', gameSession);
-    console.log('pendingMaxValues:', pendingMaxValues);
-    
-    if (isAdmin && hasUnsavedChanges) {
-      console.log('Using pending values:', pendingMaxValues);
-      return pendingMaxValues;
-    }
-    
-    const currentValues = {
-      maxPlayers: gameSession?.maxPlayers || 18,
-      maxStandbyPlayers: gameSession?.maxStandbyPlayers || 4
+    return {
+      maxPlayers: gameSession?.maxPlayers ?? 18,
+      maxStandbyPlayers: gameSession?.maxStandbyPlayers ?? 4
     };
-    console.log('Using gameSession values:', currentValues);
-    return currentValues;
   };
 
   // Load current session on component mount
@@ -70,31 +53,17 @@ const BadmintonManager: React.FC = () => {
     loadCurrentSession();
   }, []);
 
-  // Update pending values when gameSession changes
-  useEffect(() => {
-    if (gameSession) {
-      console.log('=== gameSession Updated ===');
-      console.log('New gameSession:', gameSession);
-      setPendingMaxValues({
-        maxPlayers: gameSession.maxPlayers || 18,
-        maxStandbyPlayers: gameSession.maxStandbyPlayers || 4
-      });
-    }
-  }, [gameSession]);
+
 
   const loadCurrentSession = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await gameApi.getCurrentSession();
-      console.log('=== loadCurrentSession Response ===');
-      console.log('API Response:', response);
       if (response.success && response.data) {
-        console.log('Setting gameSession to:', response.data);
         setGameSession(response.data);
       } else {
         // No active session found, create a default one
-        console.log('No active session, creating default');
         setGameSession({
           courts: 3,
           maxPlayers: 18,
@@ -143,10 +112,7 @@ const BadmintonManager: React.FC = () => {
       if (response.success && response.data) {
         setGameSession(response.data);
         setHasUnsavedChanges(false);
-        setPendingMaxValues({
-          maxPlayers: response.data.maxPlayers || 18,
-          maxStandbyPlayers: response.data.maxStandbyPlayers || 4
-        });
+
         setSuccess("Settings saved successfully!");
         setTimeout(() => setSuccess(null), 3000);
       }
@@ -460,10 +426,7 @@ const BadmintonManager: React.FC = () => {
       setFormData(prev => ({ ...prev, [field]: value }));
       setHasUnsavedChanges(true);
       
-      // Update pending max values for display
-      if (field === 'maxPlayers' || field === 'maxStandbyPlayers') {
-        setPendingMaxValues(prev => ({ ...prev, [field]: value }));
-      }
+
     };
 
     return (
