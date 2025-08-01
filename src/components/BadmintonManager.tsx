@@ -719,12 +719,6 @@ const BadmintonManager: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             🏸 Shuttle Hustle
           </h1>
-          <button
-            onClick={handleAdminModeClick}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            {isAdmin ? "Switch to Player View" : "Admin Mode"}
-          </button>
         </div>
 
         {/* Success/Error Messages */}
@@ -754,9 +748,6 @@ const BadmintonManager: React.FC = () => {
           </div>
         )}
 
-        {/* Admin Panel */}
-        {isAdmin && <AdminPanel />}
-
         {/* Game Info Card - Only show when there's an active match */}
         {gameSession.isActive && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -766,10 +757,6 @@ const BadmintonManager: React.FC = () => {
             </h2>
 
             <div className="text-lg text-gray-700 mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">🏸</span>
-                <span className="font-semibold">Badminton Activity</span>
-              </div>
 
               <div className="space-y-2 text-base">
                 <div className="flex items-center gap-2">
@@ -893,6 +880,9 @@ const BadmintonManager: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Admin Panel */}
+            {isAdmin && <AdminPanel />}
           </div>
         )}
 
@@ -1093,7 +1083,16 @@ const BadmintonManager: React.FC = () => {
 
         {/* Footer */}
         <div className="text-center text-gray-600 text-sm">
-          <p>Made with ❤️ by MIN 🧑🏻‍💻</p>
+          <p>
+            Made with ❤️ by{" "}
+            <button
+              onClick={handleAdminModeClick}
+              className="hover:text-gray-800 transition-colors cursor-pointer"
+            >
+              MIN
+            </button>{" "}
+            🧑🏻‍💻
+          </p>
         </div>
       </div>
 
