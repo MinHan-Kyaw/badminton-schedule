@@ -767,6 +767,101 @@ const BadmintonManager: React.FC = () => {
           </div>
         )}
 
+        {/* Player Registration */}
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
+            <input
+              type="text"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              placeholder={
+                gameSession.players.length >= getCurrentMaxValues().maxPlayers
+                  ? "Enter your name (will be added to standby)"
+                  : "Enter your name"
+              }
+              className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyPress={(e) => e.key === "Enter" && addPlayer()}
+            />
+            <button
+              onClick={addPlayer}
+              disabled={
+                !newPlayerName.trim() ||
+                gameSession.players.length +
+                  (gameSession.standbyPlayers?.length || 0) >=
+                  getCurrentMaxValues().maxPlayers +
+                    getCurrentMaxValues().maxStandbyPlayers ||
+                addingPlayer
+              }
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 sm:w-auto w-full"
+            >
+              {addingPlayer ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  Add
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <div className="flex justify-center items-center gap-4 mb-2">
+              <span
+                className={`text-lg font-semibold ${
+                  gameSession.players.length >= getCurrentMaxValues().maxPlayers
+                    ? "text-orange-600"
+                    : "text-green-600"
+                }`}
+              >
+                {gameSession.players.length} /{" "}
+                {getCurrentMaxValues().maxPlayers} players
+              </span>
+              {gameSession.standbyPlayers &&
+                gameSession.standbyPlayers.length > 0 && (
+                  <span className="text-blue-600 text-lg font-semibold">
+                    {gameSession.standbyPlayers.length} /{" "}
+                    {getCurrentMaxValues().maxStandbyPlayers} standby
+                  </span>
+                )}
+            </div>
+                         {gameSession.players.length +
+               (gameSession.standbyPlayers?.length || 0) <
+               getCurrentMaxValues().maxPlayers +
+                 getCurrentMaxValues().maxStandbyPlayers && (
+               <div className="text-sm text-gray-600">
+                 Total:{" "}
+                 {gameSession.players.length +
+                   (gameSession.standbyPlayers?.length || 0)}{" "}
+                 /{" "}
+                 {getCurrentMaxValues().maxPlayers +
+                   getCurrentMaxValues().maxStandbyPlayers}{" "}
+                 capacity
+               </div>
+             )}
+             {gameSession.players.length >= getCurrentMaxValues().maxPlayers &&
+               gameSession.players.length +
+                 (gameSession.standbyPlayers?.length || 0) <
+                 getCurrentMaxValues().maxPlayers +
+                   getCurrentMaxValues().maxStandbyPlayers && (
+               <div className="text-orange-600 text-sm mt-1">
+                 Regular slots full - New players will be added to standby list
+               </div>
+             )}
+             {gameSession.players.length +
+               (gameSession.standbyPlayers?.length || 0) >=
+               getCurrentMaxValues().maxPlayers +
+                 getCurrentMaxValues().maxStandbyPlayers && (
+               <div className="text-red-600 text-sm mt-1 font-semibold">
+                 Maximum capacity reached - No more players can be added
+               </div>
+             )}
+          </div>
+        </div>
+
         {/* Game Info Card - Only show when there's an active match */}
         {gameSession.isActive && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -810,96 +905,6 @@ const BadmintonManager: React.FC = () => {
                     <span>{gameSession.time}</span>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Player Registration */}
-            <div className="mb-6">
-              <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                <input
-                  type="text"
-                  value={newPlayerName}
-                  onChange={(e) => setNewPlayerName(e.target.value)}
-                  placeholder={
-                    gameSession.players.length >=
-                    getCurrentMaxValues().maxPlayers
-                      ? "Enter your name (will be added to standby)"
-                      : "Enter your name"
-                  }
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onKeyPress={(e) => e.key === "Enter" && addPlayer()}
-                />
-                <button
-                  onClick={addPlayer}
-                  disabled={
-                    !newPlayerName.trim() ||
-                    gameSession.players.length +
-                      (gameSession.standbyPlayers?.length || 0) >=
-                      getCurrentMaxValues().maxPlayers +
-                        getCurrentMaxValues().maxStandbyPlayers ||
-                    addingPlayer
-                  }
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 sm:w-auto w-full"
-                >
-                  {addingPlayer ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      Add
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <div className="text-center">
-                <div className="flex justify-center items-center gap-4 mb-2">
-                  <span
-                    className={`text-lg font-semibold ${
-                      gameSession.players.length >=
-                      getCurrentMaxValues().maxPlayers
-                        ? "text-orange-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {gameSession.players.length} /{" "}
-                    {getCurrentMaxValues().maxPlayers} players
-                  </span>
-                  {gameSession.standbyPlayers &&
-                    gameSession.standbyPlayers.length > 0 && (
-                      <span className="text-blue-600 text-lg font-semibold">
-                        {gameSession.standbyPlayers.length} /{" "}
-                        {getCurrentMaxValues().maxStandbyPlayers} standby
-                      </span>
-                    )}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Total:{" "}
-                  {gameSession.players.length +
-                    (gameSession.standbyPlayers?.length || 0)}{" "}
-                  /{" "}
-                  {getCurrentMaxValues().maxPlayers +
-                    getCurrentMaxValues().maxStandbyPlayers}{" "}
-                  capacity
-                </div>
-                {gameSession.players.length >=
-                  getCurrentMaxValues().maxPlayers && (
-                  <div className="text-orange-600 text-sm mt-1">
-                    Regular slots full - New players will be added to standby
-                    list
-                  </div>
-                )}
-                {gameSession.players.length +
-                  (gameSession.standbyPlayers?.length || 0) >=
-                  getCurrentMaxValues().maxPlayers +
-                    getCurrentMaxValues().maxStandbyPlayers && (
-                  <div className="text-red-600 text-sm mt-1 font-semibold">
-                    Maximum capacity reached - No more players can be added
-                  </div>
-                )}
               </div>
             </div>
 
