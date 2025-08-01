@@ -79,9 +79,10 @@ vercel
 3. Add:
    ```
    Name: MONGODB_URI
-   Value: mongodb+srv://your-username:password@cluster.mongodb.net/badminton
+   Value: mongodb+srv://username:password@cluster.mongodb.net/database
    Environment: Production
    ```
+   > **Note**: Replace with your actual MongoDB Atlas connection string
 
 ### Frontend Project Settings
 1. Go to your frontend project in Vercel dashboard
