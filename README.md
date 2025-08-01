@@ -1,129 +1,207 @@
-# Badminton Court Manager
+# 🏸 Badminton Court Manager
 
-A full-stack application for managing badminton court bookings and player registrations.
+A modern web application for managing badminton court bookings, player registrations, and game sessions.
 
 ## Features
 
-- ✅ **Google Maps Integration**: Clickable location links and embedded maps
-- ✅ **Standby Players System**: Configurable standby limit with automatic promotion
-- ✅ **Admin Settings**: Save settings with confirmation dialogs
-- ✅ **Match Management**: Finish matches with player cleanup
-- ✅ **Real-time Updates**: MongoDB backend with live data sync
+- **Court Management**: Configure number of courts and player limits
+- **Player Registration**: Real-time player sign-up with standby list
+- **Admin Panel**: Manage game settings, players, and sessions
+- **Responsive Design**: Works on desktop and mobile devices
+- **Real-time Updates**: Live player count and status updates
 
-## Prerequisites
+## Tech Stack
 
-- Node.js (v16 or higher)
-- MongoDB Atlas account (or local MongoDB)
-- npm or yarn
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS
+- **Backend**: Node.js, Express, MongoDB
+- **Icons**: Lucide React
+- **Deployment**: Vercel
 
-## Setup
+## 🚀 Vercel Deployment Guide
 
-1. **Clone the repository**
+### Prerequisites
+
+1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
+2. **MongoDB Atlas**: Set up a MongoDB database
+3. **GitHub Repository**: Push your code to GitHub
+
+### Step 1: Deploy Backend Server
+
+1. **Create Backend Project**:
    ```bash
-   git clone <repository-url>
+   # Navigate to server directory
+   cd server
+   
+   # Deploy to Vercel
+   vercel
+   ```
+
+2. **Set Environment Variables**:
+   - Go to your Vercel dashboard
+   - Navigate to your backend project
+   - Go to Settings → Environment Variables
+   - Add: `MONGODB_URI` = Your MongoDB connection string
+
+3. **Get Backend URL**:
+   - Copy the deployment URL (e.g., `https://your-backend.vercel.app`)
+
+### Step 2: Deploy Frontend
+
+1. **Create Frontend Project**:
+   ```bash
+   # Navigate to root directory
+   cd ..
+   
+   # Deploy to Vercel
+   vercel
+   ```
+
+2. **Set Environment Variables**:
+   - Go to your Vercel dashboard
+   - Navigate to your frontend project
+   - Go to Settings → Environment Variables
+   - Add: `VITE_API_URL` = Your backend URL + `/api` (e.g., `https://your-backend.vercel.app/api`)
+
+### Step 3: Update CORS (if needed)
+
+If you encounter CORS issues, update your backend `server.js`:
+
+```javascript
+app.use(cors({
+  origin: ['https://your-frontend-domain.vercel.app', 'http://localhost:5173'],
+  credentials: true
+}));
+```
+
+### Step 4: Test Deployment
+
+1. Visit your frontend URL
+2. Test all functionality:
+   - Create a new game session
+   - Add players
+   - Test standby functionality
+   - Verify admin features
+
+## 🛠️ Local Development
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- MongoDB Atlas account
+
+### Setup
+
+1. **Clone Repository**:
+   ```bash
+   git clone <your-repo-url>
    cd Badminton
    ```
 
-2. **Install dependencies**
+2. **Install Dependencies**:
    ```bash
+   # Install frontend dependencies
    npm install
-   cd server && npm install && cd ..
+   
+   # Install backend dependencies
+   cd server
+   npm install
+   cd ..
    ```
 
-3. **Configure MongoDB**
-   - Copy `server/env.example` to `server/.env`
-   - Update `MONGODB_URI` with your MongoDB Atlas connection string
-   ```bash
-   cp server/env.example server/.env
-   ```
-
-4. **Update the .env file**
+3. **Environment Variables**:
+   
+   Create `.env` file in server directory:
    ```env
-   MONGODB_URI=mongodb+srv://your-username:your-password@your-cluster.mongodb.net/badminton-manager?retryWrites=true&w=majority
+   MONGODB_URI=your_mongodb_connection_string
    PORT=3001
-   NODE_ENV=development
+   ```
+   
+   Create `.env` file in root directory:
+   ```env
+   VITE_API_URL=http://localhost:3001/api
    ```
 
-## Running the Application
-
-### Option 1: Run Frontend Only (for development)
-```bash
-npm run dev
-```
-This will start the frontend on `http://localhost:5173`
-
-### Option 2: Run Backend Only
-```bash
-npm run server
-```
-This will start the backend on `http://localhost:3001`
-
-### Option 3: Run Both (Recommended)
-```bash
-npm run dev:full
-```
-This will start both frontend and backend simultaneously.
-
-## Quick Start
-
-1. **Run the setup script** (optional):
+4. **Run Development Servers**:
    ```bash
-   ./setup.sh
-   ```
-
-2. **Configure MongoDB**:
-   ```bash
-   cp server/env.example server/.env
-   # Edit server/.env with your MongoDB connection string
-   ```
-
-3. **Start the application**:
-   ```bash
+   # Run both frontend and backend
    npm run dev:full
+   
+   # Or run separately:
+   npm run dev          # Frontend only
+   npm run server       # Backend only
    ```
 
-4. **Access the application**: Open `http://localhost:5173` in your browser
+5. **Access Application**:
+   - Frontend: http://localhost:5173
+   - Backend: http://localhost:3001
 
-## Usage
+## 📁 Project Structure
 
-1. **Access the application**: Open `http://localhost:5173` in your browser
-2. **Admin Mode**: Click "Admin Mode" to access settings
-3. **Add Google Maps Link**: In admin mode, add your Google Maps embed URL
-4. **Configure Settings**: Set courts, max players, standby limit, etc.
-5. **Save Settings**: Click "Save Settings" to persist changes
-6. **Player Registration**: Users can register for games
-7. **Standby System**: When full, players go to standby list
-8. **Finish Match**: Use "Finish Match" to clear players and end session
+```
+Badminton/
+├── src/                    # Frontend source code
+│   ├── components/         # React components
+│   ├── services/          # API services
+│   └── types/             # TypeScript types
+├── server/                # Backend server
+│   ├── models/            # MongoDB models
+│   └── server.js          # Express server
+├── vercel.json            # Frontend Vercel config
+├── server/vercel.json     # Backend Vercel config
+└── package.json           # Frontend dependencies
+```
 
-## Google Maps Integration
+## 🔧 Configuration
 
-To add a map to your location:
+### Environment Variables
 
-1. Go to [Google Maps](https://maps.google.com)
-2. Search for your location
-3. Click "Share" → "Embed a map"
-4. Copy the iframe src URL
-5. Paste it in the "Google Maps Link" field in admin mode
+**Frontend**:
+- `VITE_API_URL`: Backend API URL
 
-## API Endpoints
+**Backend**:
+- `MONGODB_URI`: MongoDB connection string
+- `PORT`: Server port (default: 3001)
 
-- `GET /api/game/current` - Get current active session
-- `PUT /api/game/:id` - Update session settings
-- `POST /api/game/:id/players` - Add player
-- `DELETE /api/game/:id/players/:playerId` - Remove player
-- `PUT /api/game/:id/close` - Finish match
+### MongoDB Setup
 
-## Troubleshooting
+1. Create a MongoDB Atlas cluster
+2. Get your connection string
+3. Add it to environment variables
+4. The app will automatically create collections
 
-### Node.js Version Issues
-If you encounter Node.js version compatibility issues:
-- The application is tested with Node.js v16.13.2
-- Some packages may show warnings but the app will still work
-- For best performance, consider upgrading to Node.js v18+
+## 🎯 Features
 
-### MongoDB Connection
-- Ensure your MongoDB Atlas cluster is running
-- Check that your IP address is whitelisted in MongoDB Atlas
-- Verify your connection string in `server/.env`
+### Admin Features
+- Configure courts and player limits
+- Set game date, time, and location
+- Manage player registrations
+- Finish game sessions
 
-## Made with ❤️ by Shuttle Hustle 
+### Player Features
+- Real-time registration
+- Automatic standby list when full
+- Player name editing
+- Session status updates
+
+## 🚀 Deployment Checklist
+
+- [ ] MongoDB Atlas database configured
+- [ ] Backend deployed to Vercel
+- [ ] Frontend deployed to Vercel
+- [ ] Environment variables set
+- [ ] CORS configured
+- [ ] All features tested
+- [ ] Domain configured (optional)
+
+## 📞 Support
+
+For issues or questions:
+1. Check the deployment logs in Vercel dashboard
+2. Verify environment variables are set correctly
+3. Test API endpoints directly
+4. Check MongoDB connection
+
+---
+
+Made with ❤️ by Shuttle Hustle 
