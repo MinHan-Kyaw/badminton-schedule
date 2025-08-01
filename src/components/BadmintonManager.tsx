@@ -955,7 +955,7 @@ const BadmintonManager: React.FC = () => {
                           autoFocus
                         />
                       ) : (
-                        <span className="text-gray-800 text-sm">
+                        <span className="text-gray-800 text-lg">
                           {player.name}
                         </span>
                       )}
@@ -1036,7 +1036,7 @@ const BadmintonManager: React.FC = () => {
                           autoFocus
                         />
                       ) : (
-                        <span className="text-gray-800 text-sm">
+                        <span className="text-gray-800 text-lg">
                           {player.name}
                         </span>
                       )}
