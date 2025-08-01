@@ -38,8 +38,6 @@ const BadmintonManager: React.FC = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [playerToRemove, setPlayerToRemove] = useState<string | null>(null);
   const [showFinishMatchDialog, setShowFinishMatchDialog] = useState(false);
-  const [pendingSettings, setPendingSettings] =
-    useState<Partial<GameSettings> | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Load current session on component mount
@@ -76,10 +74,7 @@ const BadmintonManager: React.FC = () => {
     }
   };
 
-  const updateGameSettings = (settings: Partial<GameSettings>) => {
-    setPendingSettings((prev) => ({ ...prev, ...settings }));
-    setHasUnsavedChanges(true);
-  };
+
 
   const saveSettings = async (formData: any) => {
     try {
@@ -282,10 +277,7 @@ const BadmintonManager: React.FC = () => {
     return parts[1]?.trim() || "12:00 PM";
   };
 
-  const updateTimeRange = (startTime: string, endTime: string) => {
-    const timeRange = `${startTime}–${endTime}`;
-    updateGameSettings({ time: timeRange });
-  };
+
 
   // Convert various Google Maps URLs to embed format
   const convertToEmbedUrl = (url: string): string => {
@@ -510,12 +502,10 @@ const BadmintonManager: React.FC = () => {
                 </label>
                 <select
                   value={getStartTime(formData.time)}
-                  onChange={(e) =>
-                    updateTimeRange(
-                      e.target.value,
-                      getEndTime(formData.time)
-                    )
-                  }
+                  onChange={(e) => {
+                    const timeRange = `${e.target.value}–${getEndTime(formData.time)}`;
+                    handleInputChange("time", timeRange);
+                  }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="6:00 AM">6:00 AM</option>
@@ -544,12 +534,10 @@ const BadmintonManager: React.FC = () => {
                 </label>
                 <select
                   value={getEndTime(formData.time)}
-                  onChange={(e) =>
-                    updateTimeRange(
-                      getStartTime(formData.time),
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => {
+                    const timeRange = `${getStartTime(formData.time)}–${e.target.value}`;
+                    handleInputChange("time", timeRange);
+                  }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="7:00 AM">7:00 AM</option>
