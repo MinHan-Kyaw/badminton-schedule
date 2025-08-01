@@ -243,7 +243,7 @@ const BadmintonManager: React.FC = () => {
 
   const handlePasswordSubmit = async () => {
     try {
-      const response = await fetch('/api/admin/verify-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/verify-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -262,6 +262,7 @@ const BadmintonManager: React.FC = () => {
         setPasswordError("Incorrect password");
       }
     } catch (error) {
+      console.error('Password verification error:', error);
       setPasswordError("Error verifying password");
     }
   };
