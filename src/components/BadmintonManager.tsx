@@ -81,9 +81,7 @@ const BadmintonManager: React.FC = () => {
     setHasUnsavedChanges(true);
   };
 
-  const saveSettings = async () => {
-    if (!pendingSettings) return;
-
+  const saveSettings = async (formData: any) => {
     try {
       setSavingSettings(true);
       setError(null);
@@ -93,25 +91,12 @@ const BadmintonManager: React.FC = () => {
         // Update existing session
         response = await gameApi.updateSession(
           gameSession._id,
-          pendingSettings
+          formData
         );
       } else {
         // Create new session
         const newSession = {
-          courts: pendingSettings.courts || gameSession?.courts || 3,
-          maxPlayers:
-            pendingSettings.maxPlayers || gameSession?.maxPlayers || 18,
-          maxStandbyPlayers:
-            pendingSettings.maxStandbyPlayers ||
-            gameSession?.maxStandbyPlayers ||
-            4,
-          date: pendingSettings.date || gameSession?.date || "Saturday",
-          time:
-            pendingSettings.time || gameSession?.time || "10:00 AM–12:00 PM",
-          location:
-            pendingSettings.location || gameSession?.location || "Green Hill",
-          googleMapsLink:
-            pendingSettings.googleMapsLink || gameSession?.googleMapsLink || "",
+          ...formData,
           isActive: true,
           players: [],
           standbyPlayers: [],
@@ -121,7 +106,6 @@ const BadmintonManager: React.FC = () => {
 
       if (response.success && response.data) {
         setGameSession(response.data);
-        setPendingSettings(null);
         setHasUnsavedChanges(false);
         setSuccess("Settings saved successfully!");
         setTimeout(() => setSuccess(null), 3000);
@@ -407,17 +391,36 @@ const BadmintonManager: React.FC = () => {
   };
 
   const AdminPanel: React.FC = () => {
-    // Get current values (pending or saved)
-    const getCurrentValue = (field: keyof GameSettings): any => {
-      if (pendingSettings && pendingSettings[field] !== undefined) {
-        return pendingSettings[field];
-      }
-      return gameSession?.[field];
-    };
+    // Local state for form inputs (only updates when save is clicked)
+    const [formData, setFormData] = useState({
+      courts: gameSession?.courts || 3,
+      maxPlayers: gameSession?.maxPlayers || 18,
+      maxStandbyPlayers: gameSession?.maxStandbyPlayers || 4,
+      date: gameSession?.date || "Saturday",
+      time: gameSession?.time || "10:00 AM–12:00 PM",
+      location: gameSession?.location || "Green Hill",
+      googleMapsLink: gameSession?.googleMapsLink || "",
+    });
 
-    // Handle input changes with proper state management
+    // Update form data when gameSession changes
+    useEffect(() => {
+      if (gameSession) {
+        setFormData({
+          courts: gameSession.courts || 3,
+          maxPlayers: gameSession.maxPlayers || 18,
+          maxStandbyPlayers: gameSession.maxStandbyPlayers || 4,
+          date: gameSession.date || "Saturday",
+          time: gameSession.time || "10:00 AM–12:00 PM",
+          location: gameSession.location || "Green Hill",
+          googleMapsLink: gameSession.googleMapsLink || "",
+        });
+      }
+    }, [gameSession]);
+
+    // Handle input changes (only updates local state)
     const handleInputChange = (field: keyof GameSettings, value: any) => {
-      updateGameSettings({ [field]: value });
+      setFormData(prev => ({ ...prev, [field]: value }));
+      setHasUnsavedChanges(true);
     };
 
     return (
@@ -436,7 +439,7 @@ const BadmintonManager: React.FC = () => {
               type="number"
               min="1"
               max="10"
-              value={getCurrentValue("courts") || 3}
+              value={formData.courts}
               onChange={(e) => {
                 const courts = parseInt(e.target.value) || 1;
                 handleInputChange("courts", courts);
@@ -447,13 +450,13 @@ const BadmintonManager: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Max Players (Auto: {(getCurrentValue("courts") || 3) * 6})
+              Max Players (Auto: {formData.courts * 6})
             </label>
             <input
               type="number"
               min="1"
               max="100"
-              value={getCurrentValue("maxPlayers") || 18}
+              value={formData.maxPlayers}
               onChange={(e) =>
                 handleInputChange("maxPlayers", parseInt(e.target.value) || 1)
               }
@@ -469,7 +472,7 @@ const BadmintonManager: React.FC = () => {
               type="number"
               min="0"
               max="10"
-              value={getCurrentValue("maxStandbyPlayers") || 4}
+              value={formData.maxStandbyPlayers}
               onChange={(e) =>
                 handleInputChange("maxStandbyPlayers", parseInt(e.target.value) || 0)
               }
@@ -482,7 +485,7 @@ const BadmintonManager: React.FC = () => {
               Day
             </label>
             <select
-              value={getCurrentValue("date") || "Saturday"}
+              value={formData.date}
               onChange={(e) => handleInputChange("date", e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
@@ -506,11 +509,11 @@ const BadmintonManager: React.FC = () => {
                   Start Time
                 </label>
                 <select
-                  value={getStartTime(getCurrentValue("time"))}
+                  value={getStartTime(formData.time)}
                   onChange={(e) =>
                     updateTimeRange(
                       e.target.value,
-                      getEndTime(getCurrentValue("time"))
+                      getEndTime(formData.time)
                     )
                   }
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -540,10 +543,10 @@ const BadmintonManager: React.FC = () => {
                   End Time
                 </label>
                 <select
-                  value={getEndTime(getCurrentValue("time"))}
+                  value={getEndTime(formData.time)}
                   onChange={(e) =>
                     updateTimeRange(
-                      getStartTime(getCurrentValue("time")),
+                      getStartTime(formData.time),
                       e.target.value
                     )
                   }
@@ -578,7 +581,7 @@ const BadmintonManager: React.FC = () => {
             </label>
             <input
               type="text"
-              value={getCurrentValue("location") || "Green Hill"}
+              value={formData.location}
               onChange={(e) => handleInputChange("location", e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -590,7 +593,7 @@ const BadmintonManager: React.FC = () => {
             </label>
             <input
               type="url"
-              value={getCurrentValue("googleMapsLink") || ""}
+              value={formData.googleMapsLink}
               onChange={(e) => handleInputChange("googleMapsLink", e.target.value)}
               placeholder="https://maps.google.com/..."
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -601,7 +604,7 @@ const BadmintonManager: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
           <button
-            onClick={saveSettings}
+            onClick={() => saveSettings(formData)}
             disabled={!hasUnsavedChanges || savingSettings}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
