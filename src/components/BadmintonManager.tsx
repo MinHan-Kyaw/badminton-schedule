@@ -44,7 +44,7 @@ const BadmintonManager: React.FC = () => {
   const getCurrentMaxValues = () => {
     return {
       maxPlayers: gameSession?.maxPlayers ?? 20,
-      maxStandbyPlayers: gameSession?.maxStandbyPlayers ?? 4
+      maxStandbyPlayers: gameSession?.maxStandbyPlayers ?? 4,
     };
   };
 
@@ -52,8 +52,6 @@ const BadmintonManager: React.FC = () => {
   useEffect(() => {
     loadCurrentSession();
   }, []);
-
-
 
   const loadCurrentSession = async () => {
     try {
@@ -84,8 +82,6 @@ const BadmintonManager: React.FC = () => {
     }
   };
 
-
-
   const saveSettings = async (formData: any) => {
     try {
       setSavingSettings(true);
@@ -93,16 +89,14 @@ const BadmintonManager: React.FC = () => {
       let response;
 
       // Check if maxPlayers is being changed
-      const isMaxPlayersChanged = gameSession && formData.maxPlayers !== gameSession.maxPlayers;
+      const isMaxPlayersChanged =
+        gameSession && formData.maxPlayers !== gameSession.maxPlayers;
       const oldMaxPlayers = gameSession?.maxPlayers || 0;
       const newMaxPlayers = formData.maxPlayers;
 
       if (gameSession?._id) {
         // Update existing session
-        response = await gameApi.updateSession(
-          gameSession._id,
-          formData
-        );
+        response = await gameApi.updateSession(gameSession._id, formData);
       } else {
         // Create new session
         const newSession = {
@@ -120,7 +114,7 @@ const BadmintonManager: React.FC = () => {
 
         // Show appropriate success message based on what changed
         let successMessage = "Settings saved successfully!";
-        
+
         if (isMaxPlayersChanged) {
           if (newMaxPlayers > oldMaxPlayers) {
             const playersMoved = Math.min(
@@ -128,18 +122,24 @@ const BadmintonManager: React.FC = () => {
               gameSession?.standbyPlayers?.length || 0
             );
             if (playersMoved > 0) {
-              successMessage = `Settings saved! ${playersMoved} player${playersMoved > 1 ? 's' : ''} moved from standby to regular players.`;
+              successMessage = `Settings saved! ${playersMoved} player${
+                playersMoved > 1 ? "s" : ""
+              } moved from standby to regular players.`;
             } else {
               successMessage = "Settings saved! Max players increased.";
             }
           } else if (newMaxPlayers < oldMaxPlayers) {
-            const excessPlayers = (gameSession?.players?.length || 0) - newMaxPlayers;
+            const excessPlayers =
+              (gameSession?.players?.length || 0) - newMaxPlayers;
             const playersMoved = Math.min(
               excessPlayers,
-              (gameSession?.maxStandbyPlayers || 0) - (gameSession?.standbyPlayers?.length || 0)
+              (gameSession?.maxStandbyPlayers || 0) -
+                (gameSession?.standbyPlayers?.length || 0)
             );
             if (playersMoved > 0) {
-              successMessage = `Settings saved! ${playersMoved} player${playersMoved > 1 ? 's' : ''} moved to standby due to reduced max players.`;
+              successMessage = `Settings saved! ${playersMoved} player${
+                playersMoved > 1 ? "s" : ""
+              } moved to standby due to reduced max players.`;
             } else {
               successMessage = "Settings saved! Max players reduced.";
             }
@@ -180,9 +180,11 @@ const BadmintonManager: React.FC = () => {
 
     // Check if we've reached total capacity (regular + standby)
     const currentMaxValues = getCurrentMaxValues();
-    const totalCapacity = currentMaxValues.maxPlayers + currentMaxValues.maxStandbyPlayers;
-    const currentTotal = gameSession.players.length + (gameSession.standbyPlayers?.length || 0);
-    
+    const totalCapacity =
+      currentMaxValues.maxPlayers + currentMaxValues.maxStandbyPlayers;
+    const currentTotal =
+      gameSession.players.length + (gameSession.standbyPlayers?.length || 0);
+
     if (currentTotal >= totalCapacity) {
       setError("Maximum capacity reached! No more players can be added.");
       return;
@@ -200,13 +202,15 @@ const BadmintonManager: React.FC = () => {
       if (response.success && response.data) {
         setGameSession(response.data);
         setNewPlayerName("");
-        
+
         // Determine if player was added as regular or standby
-        const wasAddedAsStandby = response.data.standbyPlayers?.some(p => p.name === newPlayerName.trim());
-        const successMessage = wasAddedAsStandby 
-          ? "Player added to standby list successfully!" 
+        const wasAddedAsStandby = response.data.standbyPlayers?.some(
+          (p) => p.name === newPlayerName.trim()
+        );
+        const successMessage = wasAddedAsStandby
+          ? "Player added to standby list successfully!"
           : "Player added successfully!";
-        
+
         setSuccess(successMessage);
         setTimeout(() => setSuccess(null), 3000);
       }
@@ -275,14 +279,17 @@ const BadmintonManager: React.FC = () => {
     try {
       setVerifyingPassword(true);
       setPasswordError("");
-      
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/verify-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password: adminPassword }),
-      });
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/admin/verify-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password: adminPassword }),
+        }
+      );
 
       const data = await response.json();
 
@@ -295,7 +302,7 @@ const BadmintonManager: React.FC = () => {
         setPasswordError("Incorrect password");
       }
     } catch (error) {
-      console.error('Password verification error:', error);
+      console.error("Password verification error:", error);
       setPasswordError("Error verifying password");
     } finally {
       setVerifyingPassword(false);
@@ -321,8 +328,6 @@ const BadmintonManager: React.FC = () => {
     const parts = timeString.split("–");
     return parts[1]?.trim() || "12:00 PM";
   };
-
-
 
   // Convert various Google Maps URLs to embed format
   const convertToEmbedUrl = (url: string): string => {
@@ -456,10 +461,8 @@ const BadmintonManager: React.FC = () => {
 
     // Handle input changes (only updates local state)
     const handleInputChange = (field: keyof GameSettings, value: any) => {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      setFormData((prev) => ({ ...prev, [field]: value }));
       setHasUnsavedChanges(true);
-      
-
     };
 
     return (
@@ -505,17 +508,24 @@ const BadmintonManager: React.FC = () => {
               <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
                 {formData.maxPlayers > gameSession.maxPlayers ? (
                   <span>
-                    ⚠️ Increasing max players will automatically move up to {Math.min(
+                    ⚠️ Increasing max players will automatically move up to{" "}
+                    {Math.min(
                       formData.maxPlayers - gameSession.maxPlayers,
                       gameSession.standbyPlayers?.length || 0
-                    )} player{Math.min(
+                    )}{" "}
+                    player
+                    {Math.min(
                       formData.maxPlayers - gameSession.maxPlayers,
                       gameSession.standbyPlayers?.length || 0
-                    ) > 1 ? 's' : ''} from standby to regular players.
+                    ) > 1
+                      ? "s"
+                      : ""}{" "}
+                    from standby to regular players.
                   </span>
                 ) : (
                   <span>
-                    ⚠️ Decreasing max players will automatically move excess players to standby (if space available).
+                    ⚠️ Decreasing max players will automatically move excess
+                    players to standby (if space available).
                   </span>
                 )}
               </div>
@@ -532,7 +542,10 @@ const BadmintonManager: React.FC = () => {
               max="10"
               value={formData.maxStandbyPlayers}
               onChange={(e) =>
-                handleInputChange("maxStandbyPlayers", parseInt(e.target.value) || 0)
+                handleInputChange(
+                  "maxStandbyPlayers",
+                  parseInt(e.target.value) || 0
+                )
               }
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -569,7 +582,9 @@ const BadmintonManager: React.FC = () => {
                 <select
                   value={getStartTime(formData.time)}
                   onChange={(e) => {
-                    const timeRange = `${e.target.value}–${getEndTime(formData.time)}`;
+                    const timeRange = `${e.target.value}–${getEndTime(
+                      formData.time
+                    )}`;
                     handleInputChange("time", timeRange);
                   }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -601,7 +616,9 @@ const BadmintonManager: React.FC = () => {
                 <select
                   value={getEndTime(formData.time)}
                   onChange={(e) => {
-                    const timeRange = `${getStartTime(formData.time)}–${e.target.value}`;
+                    const timeRange = `${getStartTime(formData.time)}–${
+                      e.target.value
+                    }`;
                     handleInputChange("time", timeRange);
                   }}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -648,7 +665,9 @@ const BadmintonManager: React.FC = () => {
             <input
               type="url"
               value={formData.googleMapsLink}
-              onChange={(e) => handleInputChange("googleMapsLink", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("googleMapsLink", e.target.value)
+              }
               placeholder="https://maps.google.com/..."
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -757,7 +776,6 @@ const BadmintonManager: React.FC = () => {
             </h2>
 
             <div className="text-lg text-gray-700 mb-4">
-
               <div className="space-y-2 text-base">
                 <div className="flex items-center gap-2">
                   <span className="flex-shrink-0">🏟</span>
@@ -795,20 +813,6 @@ const BadmintonManager: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">🐉 Important:</span> Signing up
-                means you agree to split the costs. If you need to cancel,
-                please do so at least 24 hours in advance. Last-minute
-                cancellations will not be refunded.
-              </p>
-              <p className="text-sm text-gray-700 mt-2">
-                <span className="font-semibold">💰 Cost:</span> Venue and
-                shuttlecock fees will be split equally. Payment can be made via
-                cash or QR code.
-              </p>
-            </div>
-
             {/* Player Registration */}
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row gap-2 mb-4">
@@ -817,8 +821,9 @@ const BadmintonManager: React.FC = () => {
                   value={newPlayerName}
                   onChange={(e) => setNewPlayerName(e.target.value)}
                   placeholder={
-                    gameSession.players.length >= getCurrentMaxValues().maxPlayers 
-                      ? "Enter your name (will be added to standby)" 
+                    gameSession.players.length >=
+                    getCurrentMaxValues().maxPlayers
+                      ? "Enter your name (will be added to standby)"
                       : "Enter your name"
                   }
                   className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -828,8 +833,10 @@ const BadmintonManager: React.FC = () => {
                   onClick={addPlayer}
                   disabled={
                     !newPlayerName.trim() ||
-                    (gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= 
-                    (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) ||
+                    gameSession.players.length +
+                      (gameSession.standbyPlayers?.length || 0) >=
+                      getCurrentMaxValues().maxPlayers +
+                        getCurrentMaxValues().maxStandbyPlayers ||
                     addingPlayer
                   }
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 sm:w-auto w-full"
@@ -852,33 +859,62 @@ const BadmintonManager: React.FC = () => {
                 <div className="flex justify-center items-center gap-4 mb-2">
                   <span
                     className={`text-lg font-semibold ${
-                      gameSession.players.length >= getCurrentMaxValues().maxPlayers
+                      gameSession.players.length >=
+                      getCurrentMaxValues().maxPlayers
                         ? "text-orange-600"
                         : "text-green-600"
                     }`}
                   >
-                    {gameSession.players.length} / {getCurrentMaxValues().maxPlayers} players
+                    {gameSession.players.length} /{" "}
+                    {getCurrentMaxValues().maxPlayers} players
                   </span>
-                  {gameSession.standbyPlayers && gameSession.standbyPlayers.length > 0 && (
-                    <span className="text-blue-600 text-lg font-semibold">
-                      {gameSession.standbyPlayers.length} / {getCurrentMaxValues().maxStandbyPlayers} standby
-                    </span>
-                  )}
+                  {gameSession.standbyPlayers &&
+                    gameSession.standbyPlayers.length > 0 && (
+                      <span className="text-blue-600 text-lg font-semibold">
+                        {gameSession.standbyPlayers.length} /{" "}
+                        {getCurrentMaxValues().maxStandbyPlayers} standby
+                      </span>
+                    )}
                 </div>
                 <div className="text-sm text-gray-600">
-                  Total: {gameSession.players.length + (gameSession.standbyPlayers?.length || 0)} / {getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers} capacity
+                  Total:{" "}
+                  {gameSession.players.length +
+                    (gameSession.standbyPlayers?.length || 0)}{" "}
+                  /{" "}
+                  {getCurrentMaxValues().maxPlayers +
+                    getCurrentMaxValues().maxStandbyPlayers}{" "}
+                  capacity
                 </div>
-                {gameSession.players.length >= getCurrentMaxValues().maxPlayers && (
+                {gameSession.players.length >=
+                  getCurrentMaxValues().maxPlayers && (
                   <div className="text-orange-600 text-sm mt-1">
-                    Regular slots full - New players will be added to standby list
+                    Regular slots full - New players will be added to standby
+                    list
                   </div>
                 )}
-                {(gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) && (
+                {gameSession.players.length +
+                  (gameSession.standbyPlayers?.length || 0) >=
+                  getCurrentMaxValues().maxPlayers +
+                    getCurrentMaxValues().maxStandbyPlayers && (
                   <div className="text-red-600 text-sm mt-1 font-semibold">
                     Maximum capacity reached - No more players can be added
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">🐉 Important:</span> Signing up
+                means you agree to split the costs. If you need to cancel,
+                please do so at least 24 hours in advance. Last-minute
+                cancellations will not be refunded.
+              </p>
+              <p className="text-sm text-gray-700 mt-2">
+                <span className="font-semibold">💰 Cost:</span> Venue and
+                shuttlecock fees will be split equally. Payment can be made via
+                cash or QR code.
+              </p>
             </div>
 
             {/* Admin Panel */}
@@ -1152,7 +1188,11 @@ const BadmintonManager: React.FC = () => {
                 placeholder="Enter admin password"
                 disabled={verifyingPassword}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
-                onKeyPress={(e) => e.key === "Enter" && !verifyingPassword && handlePasswordSubmit()}
+                onKeyPress={(e) =>
+                  e.key === "Enter" &&
+                  !verifyingPassword &&
+                  handlePasswordSubmit()
+                }
                 autoFocus
               />
               {passwordError && (
