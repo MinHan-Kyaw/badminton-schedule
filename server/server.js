@@ -102,6 +102,20 @@ app.put('/api/game/:id', async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    // Get the current session to compare maxPlayers
+    const currentSession = await GameSession.findById(id);
+    if (!currentSession) {
+      return res.status(404).json({
+        success: false,
+        error: 'Game session not found'
+      });
+    }
+
+    // Check if maxPlayers is being changed
+    const isMaxPlayersChanged = updates.maxPlayers !== undefined && 
+                               updates.maxPlayers !== currentSession.maxPlayers;
+
+    // Apply the updates
     const session = await GameSession.findByIdAndUpdate(
       id,
       updates,
@@ -115,10 +129,52 @@ app.put('/api/game/:id', async (req, res) => {
       });
     }
 
-    res.json({
-      success: true,
-      data: session
-    });
+    // If maxPlayers changed, rebalance players
+    if (isMaxPlayersChanged) {
+      const oldMaxPlayers = currentSession.maxPlayers;
+      const newMaxPlayers = session.maxPlayers;
+      
+      if (newMaxPlayers > oldMaxPlayers) {
+        // maxPlayers increased - move players from standby to regular
+        const playersToMove = Math.min(
+          newMaxPlayers - oldMaxPlayers,
+          session.standbyPlayers.length
+        );
+        
+        for (let i = 0; i < playersToMove; i++) {
+          const player = session.standbyPlayers.shift();
+          session.players.push(player);
+        }
+      } else if (newMaxPlayers < oldMaxPlayers) {
+        // maxPlayers decreased - move excess players to standby
+        const excessPlayers = session.players.length - newMaxPlayers;
+        
+        if (excessPlayers > 0) {
+          const playersToMove = Math.min(
+            excessPlayers,
+            session.maxStandbyPlayers - session.standbyPlayers.length
+          );
+          
+          for (let i = 0; i < playersToMove; i++) {
+            const player = session.players.pop();
+            session.standbyPlayers.push(player);
+          }
+        }
+      }
+      
+      // Save the rebalanced session
+      const rebalancedSession = await session.save();
+      
+      res.json({
+        success: true,
+        data: rebalancedSession
+      });
+    } else {
+      res.json({
+        success: true,
+        data: session
+      });
+    }
   } catch (error) {
     console.error('Error updating session:', error);
     res.status(500).json({

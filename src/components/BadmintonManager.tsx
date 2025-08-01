@@ -40,7 +40,13 @@ const BadmintonManager: React.FC = () => {
   const [showFinishMatchDialog, setShowFinishMatchDialog] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-
+  // Helper function to get current max values from database
+  const getCurrentMaxValues = () => {
+    return {
+      maxPlayers: gameSession?.maxPlayers ?? 20,
+      maxStandbyPlayers: gameSession?.maxStandbyPlayers ?? 4
+    };
+  };
 
   // Load current session on component mount
   useEffect(() => {
@@ -86,6 +92,11 @@ const BadmintonManager: React.FC = () => {
       setError(null);
       let response;
 
+      // Check if maxPlayers is being changed
+      const isMaxPlayersChanged = gameSession && formData.maxPlayers !== gameSession.maxPlayers;
+      const oldMaxPlayers = gameSession?.maxPlayers || 0;
+      const newMaxPlayers = formData.maxPlayers;
+
       if (gameSession?._id) {
         // Update existing session
         response = await gameApi.updateSession(
@@ -107,8 +118,36 @@ const BadmintonManager: React.FC = () => {
         setGameSession(response.data);
         setHasUnsavedChanges(false);
 
-        setSuccess("Settings saved successfully!");
-        setTimeout(() => setSuccess(null), 3000);
+        // Show appropriate success message based on what changed
+        let successMessage = "Settings saved successfully!";
+        
+        if (isMaxPlayersChanged) {
+          if (newMaxPlayers > oldMaxPlayers) {
+            const playersMoved = Math.min(
+              newMaxPlayers - oldMaxPlayers,
+              gameSession?.standbyPlayers?.length || 0
+            );
+            if (playersMoved > 0) {
+              successMessage = `Settings saved! ${playersMoved} player${playersMoved > 1 ? 's' : ''} moved from standby to regular players.`;
+            } else {
+              successMessage = "Settings saved! Max players increased.";
+            }
+          } else if (newMaxPlayers < oldMaxPlayers) {
+            const excessPlayers = (gameSession?.players?.length || 0) - newMaxPlayers;
+            const playersMoved = Math.min(
+              excessPlayers,
+              (gameSession?.maxStandbyPlayers || 0) - (gameSession?.standbyPlayers?.length || 0)
+            );
+            if (playersMoved > 0) {
+              successMessage = `Settings saved! ${playersMoved} player${playersMoved > 1 ? 's' : ''} moved to standby due to reduced max players.`;
+            } else {
+              successMessage = "Settings saved! Max players reduced.";
+            }
+          }
+        }
+
+        setSuccess(successMessage);
+        setTimeout(() => setSuccess(null), 5000);
       }
     } catch (err) {
       setError("Failed to save settings. Please try again.");
@@ -140,7 +179,8 @@ const BadmintonManager: React.FC = () => {
     if (!gameSession || !newPlayerName.trim()) return;
 
     // Check if we've reached total capacity (regular + standby)
-    const totalCapacity = gameSession.maxPlayers + gameSession.maxStandbyPlayers;
+    const currentMaxValues = getCurrentMaxValues();
+    const totalCapacity = currentMaxValues.maxPlayers + currentMaxValues.maxStandbyPlayers;
     const currentTotal = gameSession.players.length + (gameSession.standbyPlayers?.length || 0);
     
     if (currentTotal >= totalCapacity) {
@@ -461,6 +501,25 @@ const BadmintonManager: React.FC = () => {
               }
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+            {gameSession && formData.maxPlayers !== gameSession.maxPlayers && (
+              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                {formData.maxPlayers > gameSession.maxPlayers ? (
+                  <span>
+                    ⚠️ Increasing max players will automatically move up to {Math.min(
+                      formData.maxPlayers - gameSession.maxPlayers,
+                      gameSession.standbyPlayers?.length || 0
+                    )} player{Math.min(
+                      formData.maxPlayers - gameSession.maxPlayers,
+                      gameSession.standbyPlayers?.length || 0
+                    ) > 1 ? 's' : ''} from standby to regular players.
+                  </span>
+                ) : (
+                  <span>
+                    ⚠️ Decreasing max players will automatically move excess players to standby (if space available).
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <div>
@@ -769,7 +828,7 @@ const BadmintonManager: React.FC = () => {
                   value={newPlayerName}
                   onChange={(e) => setNewPlayerName(e.target.value)}
                   placeholder={
-                    gameSession.players.length >= gameSession.maxPlayers 
+                    gameSession.players.length >= getCurrentMaxValues().maxPlayers 
                       ? "Enter your name (will be added to standby)" 
                       : "Enter your name"
                   }
@@ -781,7 +840,7 @@ const BadmintonManager: React.FC = () => {
                   disabled={
                     !newPlayerName.trim() ||
                     (gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= 
-                    (gameSession.maxPlayers + gameSession.maxStandbyPlayers) ||
+                    (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) ||
                     addingPlayer
                   }
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
@@ -804,28 +863,28 @@ const BadmintonManager: React.FC = () => {
                 <div className="flex justify-center items-center gap-4 mb-2">
                   <span
                     className={`text-lg font-semibold ${
-                      gameSession.players.length >= gameSession.maxPlayers
+                      gameSession.players.length >= getCurrentMaxValues().maxPlayers
                         ? "text-orange-600"
                         : "text-green-600"
                     }`}
                   >
-                    {gameSession.players.length} / {gameSession.maxPlayers} players
+                    {gameSession.players.length} / {getCurrentMaxValues().maxPlayers} players
                   </span>
-                  {gameSession.maxStandbyPlayers > 0 && gameSession.standbyPlayers && gameSession.standbyPlayers.length > 0 && (
+                  {gameSession.standbyPlayers && gameSession.standbyPlayers.length > 0 && (
                     <span className="text-blue-600 text-lg font-semibold">
-                      {gameSession.standbyPlayers.length} / {gameSession.maxStandbyPlayers} standby
+                      {gameSession.standbyPlayers.length} / {getCurrentMaxValues().maxStandbyPlayers} standby
                     </span>
                   )}
                 </div>
                 <div className="text-sm text-gray-600">
-                  Total: {gameSession.players.length + (gameSession.standbyPlayers?.length || 0)} / {gameSession.maxPlayers + gameSession.maxStandbyPlayers} capacity
+                  Total: {gameSession.players.length + (gameSession.standbyPlayers?.length || 0)} / {getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers} capacity
                 </div>
-                {gameSession.players.length >= gameSession.maxPlayers && (
+                {gameSession.players.length >= getCurrentMaxValues().maxPlayers && (
                   <div className="text-orange-600 text-sm mt-1">
                     Regular slots full - New players will be added to standby list
                   </div>
                 )}
-                {(gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= (gameSession.maxPlayers + gameSession.maxStandbyPlayers) && (
+                {(gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) && (
                   <div className="text-red-600 text-sm mt-1 font-semibold">
                     Maximum capacity reached - No more players can be added
                   </div>
@@ -840,7 +899,7 @@ const BadmintonManager: React.FC = () => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Registered Players ({gameSession.players.length} / {gameSession.maxPlayers})
+              Registered Players
             </h3>
 
             {gameSession.players.length === 0 ? (
@@ -848,7 +907,7 @@ const BadmintonManager: React.FC = () => {
                 No players registered yet. Be the first to sign up!
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {gameSession.players.map((player, index) => (
                   <div
                     key={player._id || index}
@@ -921,16 +980,15 @@ const BadmintonManager: React.FC = () => {
 
         {/* Standby Players List */}
         {gameSession.isActive &&
-          gameSession.maxStandbyPlayers > 0 &&
           gameSession.standbyPlayers &&
           gameSession.standbyPlayers.length > 0 && (
             <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                Standby Players ({gameSession.standbyPlayers.length} / {gameSession.maxStandbyPlayers})
+                Standby Players
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {gameSession.standbyPlayers.map((player, index) => (
                   <div
                     key={player._id || index}
