@@ -773,35 +773,37 @@ const BadmintonManager: React.FC = () => {
 
               <div className="space-y-2 text-base">
                 <div className="flex items-center gap-2">
-                  <span>🏟</span>
-                  <span>
-                    <strong>Courts:</strong> {gameSession.courts}
-                  </span>
+                  <span className="flex-shrink-0">🏟</span>
+                  <div className="flex items-center gap-1">
+                    <strong className="flex-shrink-0">Courts:</strong>
+                    <span>{gameSession.courts}</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>
-                    <strong>Location:</strong>{" "}
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                  <div className="flex items-center gap-1 min-w-0">
+                    <strong className="flex-shrink-0">Location:</strong>
                     {gameSession.googleMapsLink ? (
                       <a
                         href={gameSession.googleMapsLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+                        className="text-blue-600 hover:text-blue-800 underline flex items-center gap-1 truncate"
                       >
-                        {gameSession.location}
-                        <ExternalLink className="w-3 h-3" />
+                        <span className="truncate">{gameSession.location}</span>
+                        <ExternalLink className="w-3 h-3 flex-shrink-0" />
                       </a>
                     ) : (
-                      gameSession.location
+                      <span className="truncate">{gameSession.location}</span>
                     )}
-                  </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  <span>
-                    <strong>Time:</strong> {gameSession.time}
-                  </span>
+                  <Clock className="w-4 h-4 flex-shrink-0" />
+                  <div className="flex items-center gap-1">
+                    <strong className="flex-shrink-0">Time:</strong>
+                    <span>{gameSession.time}</span>
+                  </div>
                 </div>
               </div>
             </div>
