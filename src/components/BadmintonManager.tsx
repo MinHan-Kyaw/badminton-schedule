@@ -824,7 +824,7 @@ const BadmintonManager: React.FC = () => {
 
             {/* Player Registration */}
             <div className="mb-6">
-              <div className="flex gap-2 mb-4">
+              <div className="flex flex-col sm:flex-row gap-2 mb-4">
                 <input
                   type="text"
                   value={newPlayerName}
@@ -845,7 +845,7 @@ const BadmintonManager: React.FC = () => {
                     (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) ||
                     addingPlayer
                   }
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 sm:w-auto w-full"
                 >
                   {addingPlayer ? (
                     <>
