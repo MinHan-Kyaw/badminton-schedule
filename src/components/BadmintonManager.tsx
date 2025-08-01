@@ -39,6 +39,21 @@ const BadmintonManager: React.FC = () => {
   const [playerToRemove, setPlayerToRemove] = useState<string | null>(null);
   const [showFinishMatchDialog, setShowFinishMatchDialog] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [pendingMaxValues, setPendingMaxValues] = useState({
+    maxPlayers: 18,
+    maxStandbyPlayers: 4
+  });
+
+  // Helper function to get current max values (considers pending changes)
+  const getCurrentMaxValues = () => {
+    if (isAdmin && hasUnsavedChanges) {
+      return pendingMaxValues;
+    }
+    return {
+      maxPlayers: gameSession?.maxPlayers || 18,
+      maxStandbyPlayers: gameSession?.maxStandbyPlayers || 4
+    };
+  };
 
   // Load current session on component mount
   useEffect(() => {
@@ -102,6 +117,10 @@ const BadmintonManager: React.FC = () => {
       if (response.success && response.data) {
         setGameSession(response.data);
         setHasUnsavedChanges(false);
+        setPendingMaxValues({
+          maxPlayers: response.data.maxPlayers || 18,
+          maxStandbyPlayers: response.data.maxStandbyPlayers || 4
+        });
         setSuccess("Settings saved successfully!");
         setTimeout(() => setSuccess(null), 3000);
       }
@@ -135,7 +154,8 @@ const BadmintonManager: React.FC = () => {
     if (!gameSession || !newPlayerName.trim()) return;
 
     // Check if we've reached total capacity (regular + standby)
-    const totalCapacity = gameSession.maxPlayers + (gameSession.maxStandbyPlayers || 0);
+    const currentMaxValues = getCurrentMaxValues();
+    const totalCapacity = currentMaxValues.maxPlayers + currentMaxValues.maxStandbyPlayers;
     const currentTotal = gameSession.players.length + (gameSession.standbyPlayers?.length || 0);
     
     if (currentTotal >= totalCapacity) {
@@ -413,6 +433,11 @@ const BadmintonManager: React.FC = () => {
     const handleInputChange = (field: keyof GameSettings, value: any) => {
       setFormData(prev => ({ ...prev, [field]: value }));
       setHasUnsavedChanges(true);
+      
+      // Update pending max values for display
+      if (field === 'maxPlayers' || field === 'maxStandbyPlayers') {
+        setPendingMaxValues(prev => ({ ...prev, [field]: value }));
+      }
     };
 
     return (
@@ -762,7 +787,7 @@ const BadmintonManager: React.FC = () => {
                   value={newPlayerName}
                   onChange={(e) => setNewPlayerName(e.target.value)}
                   placeholder={
-                    gameSession.players.length >= gameSession.maxPlayers 
+                    gameSession.players.length >= getCurrentMaxValues().maxPlayers 
                       ? "Enter your name (will be added to standby)" 
                       : "Enter your name"
                   }
@@ -774,7 +799,7 @@ const BadmintonManager: React.FC = () => {
                   disabled={
                     !newPlayerName.trim() ||
                     (gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= 
-                    (gameSession.maxPlayers + (gameSession.maxStandbyPlayers || 0)) ||
+                    (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) ||
                     addingPlayer
                   }
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
@@ -797,28 +822,28 @@ const BadmintonManager: React.FC = () => {
                 <div className="flex justify-center items-center gap-4 mb-2">
                   <span
                     className={`text-lg font-semibold ${
-                      gameSession.players.length >= gameSession.maxPlayers
+                      gameSession.players.length >= getCurrentMaxValues().maxPlayers
                         ? "text-orange-600"
                         : "text-green-600"
                     }`}
                   >
-                    {gameSession.players.length} / {gameSession.maxPlayers} players
+                    {gameSession.players.length} / {getCurrentMaxValues().maxPlayers} players
                   </span>
                   {gameSession.standbyPlayers && gameSession.standbyPlayers.length > 0 && (
                     <span className="text-blue-600 text-lg font-semibold">
-                      {gameSession.standbyPlayers.length} / {gameSession.maxStandbyPlayers} standby
+                      {gameSession.standbyPlayers.length} / {getCurrentMaxValues().maxStandbyPlayers} standby
                     </span>
                   )}
                 </div>
                 <div className="text-sm text-gray-600">
-                  Total: {gameSession.players.length + (gameSession.standbyPlayers?.length || 0)} / {gameSession.maxPlayers + (gameSession.maxStandbyPlayers || 0)} capacity
+                  Total: {gameSession.players.length + (gameSession.standbyPlayers?.length || 0)} / {getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers} capacity
                 </div>
-                {gameSession.players.length >= gameSession.maxPlayers && (
+                {gameSession.players.length >= getCurrentMaxValues().maxPlayers && (
                   <div className="text-orange-600 text-sm mt-1">
                     Regular slots full - New players will be added to standby list
                   </div>
                 )}
-                {(gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= (gameSession.maxPlayers + (gameSession.maxStandbyPlayers || 0)) && (
+                {(gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) && (
                   <div className="text-red-600 text-sm mt-1 font-semibold">
                     Maximum capacity reached - No more players can be added
                   </div>
