@@ -377,7 +377,7 @@ const BadmintonManager: React.FC = () => {
               value={getCurrentValue("courts") || 3}
               onChange={(e) => {
                 const courts = parseInt(e.target.value) || 1;
-                updateGameSettings({ courts, maxPlayers: courts * 6 });
+                updateGameSettings({ courts });
               }}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -389,8 +389,15 @@ const BadmintonManager: React.FC = () => {
             </label>
             <input
               type="number"
+              min="1"
+              max="100"
               value={getCurrentValue("maxPlayers") || 18}
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+              onChange={(e) =>
+                updateGameSettings({
+                  maxPlayers: parseInt(e.target.value) || 1,
+                })
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
