@@ -40,13 +40,7 @@ const BadmintonManager: React.FC = () => {
   const [showFinishMatchDialog, setShowFinishMatchDialog] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Helper function to get current max values from database
-  const getCurrentMaxValues = () => {
-    return {
-      maxPlayers: gameSession?.maxPlayers ?? 20,
-      maxStandbyPlayers: gameSession?.maxStandbyPlayers ?? 4
-    };
-  };
+
 
   // Load current session on component mount
   useEffect(() => {
@@ -146,8 +140,7 @@ const BadmintonManager: React.FC = () => {
     if (!gameSession || !newPlayerName.trim()) return;
 
     // Check if we've reached total capacity (regular + standby)
-    const currentMaxValues = getCurrentMaxValues();
-    const totalCapacity = currentMaxValues.maxPlayers + currentMaxValues.maxStandbyPlayers;
+    const totalCapacity = gameSession.maxPlayers + gameSession.maxStandbyPlayers;
     const currentTotal = gameSession.players.length + (gameSession.standbyPlayers?.length || 0);
     
     if (currentTotal >= totalCapacity) {
@@ -776,7 +769,7 @@ const BadmintonManager: React.FC = () => {
                   value={newPlayerName}
                   onChange={(e) => setNewPlayerName(e.target.value)}
                   placeholder={
-                    gameSession.players.length >= getCurrentMaxValues().maxPlayers 
+                    gameSession.players.length >= gameSession.maxPlayers 
                       ? "Enter your name (will be added to standby)" 
                       : "Enter your name"
                   }
@@ -788,7 +781,7 @@ const BadmintonManager: React.FC = () => {
                   disabled={
                     !newPlayerName.trim() ||
                     (gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= 
-                    (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) ||
+                    (gameSession.maxPlayers + gameSession.maxStandbyPlayers) ||
                     addingPlayer
                   }
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
@@ -811,28 +804,28 @@ const BadmintonManager: React.FC = () => {
                 <div className="flex justify-center items-center gap-4 mb-2">
                   <span
                     className={`text-lg font-semibold ${
-                      gameSession.players.length >= getCurrentMaxValues().maxPlayers
+                      gameSession.players.length >= gameSession.maxPlayers
                         ? "text-orange-600"
                         : "text-green-600"
                     }`}
                   >
-                    {gameSession.players.length} / {getCurrentMaxValues().maxPlayers} players
+                    {gameSession.players.length} / {gameSession.maxPlayers} players
                   </span>
-                  {gameSession.standbyPlayers && gameSession.standbyPlayers.length > 0 && (
+                  {gameSession.maxStandbyPlayers > 0 && gameSession.standbyPlayers && gameSession.standbyPlayers.length > 0 && (
                     <span className="text-blue-600 text-lg font-semibold">
-                      {gameSession.standbyPlayers.length} / {getCurrentMaxValues().maxStandbyPlayers} standby
+                      {gameSession.standbyPlayers.length} / {gameSession.maxStandbyPlayers} standby
                     </span>
                   )}
                 </div>
                 <div className="text-sm text-gray-600">
-                  Total: {gameSession.players.length + (gameSession.standbyPlayers?.length || 0)} / {getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers} capacity
+                  Total: {gameSession.players.length + (gameSession.standbyPlayers?.length || 0)} / {gameSession.maxPlayers + gameSession.maxStandbyPlayers} capacity
                 </div>
-                {gameSession.players.length >= getCurrentMaxValues().maxPlayers && (
+                {gameSession.players.length >= gameSession.maxPlayers && (
                   <div className="text-orange-600 text-sm mt-1">
                     Regular slots full - New players will be added to standby list
                   </div>
                 )}
-                {(gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= (getCurrentMaxValues().maxPlayers + getCurrentMaxValues().maxStandbyPlayers) && (
+                {(gameSession.players.length + (gameSession.standbyPlayers?.length || 0)) >= (gameSession.maxPlayers + gameSession.maxStandbyPlayers) && (
                   <div className="text-red-600 text-sm mt-1 font-semibold">
                     Maximum capacity reached - No more players can be added
                   </div>
@@ -847,7 +840,7 @@ const BadmintonManager: React.FC = () => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Registered Players
+              Registered Players ({gameSession.players.length} / {gameSession.maxPlayers})
             </h3>
 
             {gameSession.players.length === 0 ? (
@@ -855,7 +848,7 @@ const BadmintonManager: React.FC = () => {
                 No players registered yet. Be the first to sign up!
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
                 {gameSession.players.map((player, index) => (
                   <div
                     key={player._id || index}
@@ -928,15 +921,16 @@ const BadmintonManager: React.FC = () => {
 
         {/* Standby Players List */}
         {gameSession.isActive &&
+          gameSession.maxStandbyPlayers > 0 &&
           gameSession.standbyPlayers &&
           gameSession.standbyPlayers.length > 0 && (
             <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                Standby Players
+                Standby Players ({gameSession.standbyPlayers.length} / {gameSession.maxStandbyPlayers})
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
                 {gameSession.standbyPlayers.map((player, index) => (
                   <div
                     key={player._id || index}
