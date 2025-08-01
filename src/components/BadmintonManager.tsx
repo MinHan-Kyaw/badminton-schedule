@@ -415,6 +415,11 @@ const BadmintonManager: React.FC = () => {
       return gameSession?.[field];
     };
 
+    // Handle input changes with proper state management
+    const handleInputChange = (field: keyof GameSettings, value: any) => {
+      updateGameSettings({ [field]: value });
+    };
+
     return (
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -434,7 +439,7 @@ const BadmintonManager: React.FC = () => {
               value={getCurrentValue("courts") || 3}
               onChange={(e) => {
                 const courts = parseInt(e.target.value) || 1;
-                updateGameSettings({ courts });
+                handleInputChange("courts", courts);
               }}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -450,9 +455,7 @@ const BadmintonManager: React.FC = () => {
               max="100"
               value={getCurrentValue("maxPlayers") || 18}
               onChange={(e) =>
-                updateGameSettings({
-                  maxPlayers: parseInt(e.target.value) || 1,
-                })
+                handleInputChange("maxPlayers", parseInt(e.target.value) || 1)
               }
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -468,9 +471,7 @@ const BadmintonManager: React.FC = () => {
               max="10"
               value={getCurrentValue("maxStandbyPlayers") || 4}
               onChange={(e) =>
-                updateGameSettings({
-                  maxStandbyPlayers: parseInt(e.target.value) || 0,
-                })
+                handleInputChange("maxStandbyPlayers", parseInt(e.target.value) || 0)
               }
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -482,7 +483,7 @@ const BadmintonManager: React.FC = () => {
             </label>
             <select
               value={getCurrentValue("date") || "Saturday"}
-              onChange={(e) => updateGameSettings({ date: e.target.value })}
+              onChange={(e) => handleInputChange("date", e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="Monday">Monday</option>
@@ -578,7 +579,7 @@ const BadmintonManager: React.FC = () => {
             <input
               type="text"
               value={getCurrentValue("location") || "Green Hill"}
-              onChange={(e) => updateGameSettings({ location: e.target.value })}
+              onChange={(e) => handleInputChange("location", e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -590,9 +591,7 @@ const BadmintonManager: React.FC = () => {
             <input
               type="url"
               value={getCurrentValue("googleMapsLink") || ""}
-              onChange={(e) =>
-                updateGameSettings({ googleMapsLink: e.target.value })
-              }
+              onChange={(e) => handleInputChange("googleMapsLink", e.target.value)}
               placeholder="https://maps.google.com/..."
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
