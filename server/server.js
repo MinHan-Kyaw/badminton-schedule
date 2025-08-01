@@ -376,6 +376,39 @@ app.put('/api/game/:id/close', async (req, res) => {
   }
 });
 
+// Admin password verification endpoint
+app.post('/api/admin/verify-password', (req, res) => {
+  try {
+    const { password } = req.body;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    
+    if (!adminPassword) {
+      return res.status(500).json({
+        success: false,
+        error: 'Admin password not configured'
+      });
+    }
+    
+    if (password === adminPassword) {
+      res.json({
+        success: true,
+        message: 'Password verified'
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        error: 'Incorrect password'
+      });
+    }
+  } catch (error) {
+    console.error('Error verifying password:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({

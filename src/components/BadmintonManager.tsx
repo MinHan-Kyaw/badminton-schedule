@@ -26,6 +26,9 @@ const BadmintonManager: React.FC = () => {
   const [savingSettings, setSavingSettings] = useState(false);
   const [addingPlayer, setAddingPlayer] = useState(false);
   const [removingPlayer, setRemovingPlayer] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
   const [newPlayerName, setNewPlayerName] = useState("");
@@ -226,6 +229,47 @@ const BadmintonManager: React.FC = () => {
   const handleCancelRemove = () => {
     setPlayerToRemove(null);
     setShowConfirmDialog(false);
+  };
+
+  const handleAdminModeClick = () => {
+    if (!isAdmin) {
+      setShowPasswordModal(true);
+      setAdminPassword("");
+      setPasswordError("");
+    } else {
+      setIsAdmin(false);
+    }
+  };
+
+  const handlePasswordSubmit = async () => {
+    try {
+      const response = await fetch('/api/admin/verify-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: adminPassword }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIsAdmin(true);
+        setShowPasswordModal(false);
+        setAdminPassword("");
+        setPasswordError("");
+      } else {
+        setPasswordError("Incorrect password");
+      }
+    } catch (error) {
+      setPasswordError("Error verifying password");
+    }
+  };
+
+  const handlePasswordCancel = () => {
+    setShowPasswordModal(false);
+    setAdminPassword("");
+    setPasswordError("");
   };
 
   // Helper functions for time range
@@ -607,7 +651,7 @@ const BadmintonManager: React.FC = () => {
             🏸 Badminton Court Manager
           </h1>
           <button
-            onClick={() => setIsAdmin(!isAdmin)}
+            onClick={handleAdminModeClick}
             className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
             {isAdmin ? "Switch to Player View" : "Admin Mode"}
@@ -1013,6 +1057,49 @@ const BadmintonManager: React.FC = () => {
                 ) : (
                   "Remove"
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Admin Access Required
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Please enter the admin password to access admin settings.
+            </p>
+            <div className="mb-4">
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="Enter admin password"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onKeyPress={(e) => e.key === "Enter" && handlePasswordSubmit()}
+                autoFocus
+              />
+              {passwordError && (
+                <p className="text-red-600 text-sm mt-2">{passwordError}</p>
+              )}
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={handlePasswordCancel}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePasswordSubmit}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Access Admin
               </button>
             </div>
           </div>
