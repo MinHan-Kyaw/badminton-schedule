@@ -1035,7 +1035,7 @@ const BadmintonManager: React.FC = () => {
 
         {/* Footer */}
         <div className="text-center text-gray-600 text-sm">
-          <p>Made with ❤️ by Shuttle Hustle</p>
+          <p>Made with ❤️ by MIN 🧑🏻‍💻</p>
         </div>
       </div>
 

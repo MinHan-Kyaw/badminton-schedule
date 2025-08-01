@@ -204,4 +204,4 @@ For issues or questions:
 
 ---
 
-Made with ❤️ by Shuttle Hustle 
+Made with ❤️ by MIN 🧑🏻‍💻
