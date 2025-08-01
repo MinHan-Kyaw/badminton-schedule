@@ -43,7 +43,7 @@ const BadmintonManager: React.FC = () => {
   // Helper function to get current max values from database
   const getCurrentMaxValues = () => {
     return {
-      maxPlayers: gameSession?.maxPlayers ?? 18,
+      maxPlayers: gameSession?.maxPlayers ?? 20,
       maxStandbyPlayers: gameSession?.maxStandbyPlayers ?? 4
     };
   };
@@ -66,7 +66,7 @@ const BadmintonManager: React.FC = () => {
         // No active session found, create a default one
         setGameSession({
           courts: 3,
-          maxPlayers: 18,
+          maxPlayers: 20,
           maxStandbyPlayers: 4,
           date: "Saturday",
           time: "10:00 AM–12:00 PM",
@@ -398,7 +398,7 @@ const BadmintonManager: React.FC = () => {
     // Local state for form inputs (only updates when save is clicked)
     const [formData, setFormData] = useState({
       courts: gameSession?.courts || 3,
-      maxPlayers: gameSession?.maxPlayers || 18,
+      maxPlayers: gameSession?.maxPlayers || 20,
       maxStandbyPlayers: gameSession?.maxStandbyPlayers || 4,
       date: gameSession?.date || "Saturday",
       time: gameSession?.time || "10:00 AM–12:00 PM",
@@ -411,7 +411,7 @@ const BadmintonManager: React.FC = () => {
       if (gameSession) {
         setFormData({
           courts: gameSession.courts || 3,
-          maxPlayers: gameSession.maxPlayers || 18,
+          maxPlayers: gameSession.maxPlayers || 20,
           maxStandbyPlayers: gameSession.maxStandbyPlayers || 4,
           date: gameSession.date || "Saturday",
           time: gameSession.time || "10:00 AM–12:00 PM",
