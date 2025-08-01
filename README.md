@@ -1,4 +1,4 @@
-# 🏸 Badminton Court Manager
+# 🏸 Badminton Court Manager (Shuttle Hustle)
 
 A modern web application for managing badminton court bookings, player registrations, and game sessions.
 

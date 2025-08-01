@@ -717,7 +717,7 @@ const BadmintonManager: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            🏸 Badminton Court Manager
+            🏸 Shuttle Hustle
           </h1>
           <button
             onClick={handleAdminModeClick}
