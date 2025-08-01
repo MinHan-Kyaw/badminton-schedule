@@ -828,44 +828,36 @@ const BadmintonManager: React.FC = () => {
                   </span>
                 )}
             </div>
-                         {gameSession.players.length +
-               (gameSession.standbyPlayers?.length || 0) <
-               getCurrentMaxValues().maxPlayers +
-                 getCurrentMaxValues().maxStandbyPlayers && (
-               <div className="text-sm text-gray-600">
-                 Total:{" "}
-                 {gameSession.players.length +
-                   (gameSession.standbyPlayers?.length || 0)}{" "}
-                 /{" "}
-                 {getCurrentMaxValues().maxPlayers +
-                   getCurrentMaxValues().maxStandbyPlayers}{" "}
-                 capacity
-               </div>
-             )}
-             {gameSession.players.length >= getCurrentMaxValues().maxPlayers &&
-               gameSession.players.length +
-                 (gameSession.standbyPlayers?.length || 0) <
-                 getCurrentMaxValues().maxPlayers +
-                   getCurrentMaxValues().maxStandbyPlayers && (
-               <div className="text-orange-600 text-sm mt-1">
-                 Regular slots full - New players will be added to standby list
-               </div>
-             )}
-             {gameSession.players.length +
-               (gameSession.standbyPlayers?.length || 0) >=
-               getCurrentMaxValues().maxPlayers +
-                 getCurrentMaxValues().maxStandbyPlayers && (
-               <div className="text-red-600 text-sm mt-1 font-semibold">
-                 Maximum capacity reached - No more players can be added
-               </div>
-             )}
+            {gameSession.players.length +
+              (gameSession.standbyPlayers?.length || 0) <
+              getCurrentMaxValues().maxPlayers +
+                getCurrentMaxValues().maxStandbyPlayers && (
+              <div className="text-sm text-gray-600">
+                Total:{" "}
+                {gameSession.players.length +
+                  (gameSession.standbyPlayers?.length || 0)}{" "}
+                /{" "}
+                {getCurrentMaxValues().maxPlayers +
+                  getCurrentMaxValues().maxStandbyPlayers}{" "}
+                capacity
+              </div>
+            )}
+            {gameSession.players.length >= getCurrentMaxValues().maxPlayers &&
+              gameSession.players.length +
+                (gameSession.standbyPlayers?.length || 0) <
+                getCurrentMaxValues().maxPlayers +
+                  getCurrentMaxValues().maxStandbyPlayers && (
+                <div className="text-orange-600 text-sm mt-1">
+                  Regular slots full - New players will be added to standby list
+                </div>
+              )}
           </div>
         </div>
 
         {/* Game Info Card - Only show when there's an active match */}
         {gameSession.isActive && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
               {gameSession.date} {gameSession.courts} Court Badminton Game -
               Sign Up
             </h2>
@@ -901,8 +893,10 @@ const BadmintonManager: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 flex-shrink-0" />
                   <div className="flex items-center gap-1">
-                    <strong className="flex-shrink-0">Time:</strong>
-                    <span>{gameSession.time}</span>
+                    <strong className="flex-shrink-0">Date:</strong>
+                    <span>
+                      {gameSession.date} ( {gameSession.time} )
+                    </span>
                   </div>
                 </div>
               </div>
