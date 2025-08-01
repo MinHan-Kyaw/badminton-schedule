@@ -29,6 +29,7 @@ const BadmintonManager: React.FC = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [verifyingPassword, setVerifyingPassword] = useState(false);
 
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
   const [newPlayerName, setNewPlayerName] = useState("");
@@ -242,7 +243,15 @@ const BadmintonManager: React.FC = () => {
   };
 
   const handlePasswordSubmit = async () => {
+    if (!adminPassword.trim()) {
+      setPasswordError("Please enter a password");
+      return;
+    }
+
     try {
+      setVerifyingPassword(true);
+      setPasswordError("");
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/verify-password`, {
         method: 'POST',
         headers: {
@@ -264,6 +273,8 @@ const BadmintonManager: React.FC = () => {
     } catch (error) {
       console.error('Password verification error:', error);
       setPasswordError("Error verifying password");
+    } finally {
+      setVerifyingPassword(false);
     }
   };
 
@@ -271,6 +282,7 @@ const BadmintonManager: React.FC = () => {
     setShowPasswordModal(false);
     setAdminPassword("");
     setPasswordError("");
+    setVerifyingPassword(false);
   };
 
   // Helper functions for time range
@@ -1081,8 +1093,9 @@ const BadmintonManager: React.FC = () => {
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 placeholder="Enter admin password"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onKeyPress={(e) => e.key === "Enter" && handlePasswordSubmit()}
+                disabled={verifyingPassword}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+                onKeyPress={(e) => e.key === "Enter" && !verifyingPassword && handlePasswordSubmit()}
                 autoFocus
               />
               {passwordError && (
@@ -1092,15 +1105,24 @@ const BadmintonManager: React.FC = () => {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={handlePasswordCancel}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                disabled={verifyingPassword}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePasswordSubmit}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={verifyingPassword}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Access Admin
+                {verifyingPassword ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Access Admin"
+                )}
               </button>
             </div>
           </div>
